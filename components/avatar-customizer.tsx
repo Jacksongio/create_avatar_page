@@ -48,16 +48,28 @@ export default function AvatarCustomizer() {
   const [avatarUrl, setAvatarUrl] = useState<string>('');
 
   const generateAvatar = async () => {
+    setAvatarGenerated(true);
+    setAvatarUrl(''); // clear previous image so user sees progress
+
     try {
-      const response = await fetch('/api/get-random-avatar');
-      const data = await response.json();
-      setAvatarUrl(data.url);
-      setAvatarGenerated(true);
+      const res = await fetch('/api/generate-character-avatar', { method: 'POST' });
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({ error: 'Failed to parse error response' }));
+        throw new Error(errorData.details || errorData.error || 'Failed to generate avatar');
+      }
+
+      const { b64_json } = await res.json();
+      if (b64_json) {
+        setAvatarUrl(`data:image/png;base64,${b64_json}`);
+      } else {
+        throw new Error('No image data returned from server.');
+      }
     } catch (error) {
-      console.error('Error fetching avatar:', error);
-      alert('Failed to fetch avatar');
+      console.error('Error generating avatar:', error);
+      alert(error instanceof Error ? error.message : 'An unknown error occurred');
     }
-  }
+  };
+
   // handles saving the attributes to the server
   const handleSubmit = async () => {
     const payload = {
@@ -210,7 +222,7 @@ export default function AvatarCustomizer() {
                     disabled={!avatarGenerated}
                     onClick={handleSubmit}
                   >
-                    Submit Character
+                    Save Character Description 
                   </Button>
                 </div>
               </CardContent>
