@@ -1,0 +1,6 @@
+{
+  "Temperature": 50,
+  "FREQUENCY_PENALTY": 50,
+  "MAX_TOKENS": 50,
+  "PRES_PENALTY": 50
+}
